@@ -1,0 +1,118 @@
+.quickterms-sidebar {
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 400px;
+    height: 100vh;
+    background: white;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    font-family: Arial, sans-serif;
+}
+
+.quickterms-header {
+    padding: 15px;
+    background: #4CAF50;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.quickterms-header h2 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.quickterms-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.quickterms-content {
+    padding: 15px;
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+.quickterms-section {
+    margin-bottom: 20px;
+}
+
+.quickterms-section h3 {
+    color: #333;
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+.quickterms-section p {
+    color: #666;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.quickterms-risk {
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+}
+
+.quickterms-risk.low {
+    background-color: #dff0d8;
+    color: #3c763d;
+}
+
+.quickterms-risk.medium {
+    background-color: #fcf8e3;
+    color: #8a6d3b;
+}
+
+.quickterms-risk.high {
+    background-color: #f2dede;
+    color: #a94442;
+}
+
+.quickterms-clauses {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.quickterms-clause {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.quickterms-clause h4 {
+    margin: 0 0 5px 0;
+    color: #333;
+}
+
+.quickterms-clause p {
+    margin: 0;
+    color: #666;
+}
+
+.quickterms-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    color: #666;
+}
+
+.quickterms-error {
+    padding: 15px;
+    background-color: #f2dede;
+    color: #a94442;
+    border-radius: 4px;
+    margin: 10px 0;
+} 
