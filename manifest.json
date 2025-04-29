@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "QuickTerms",
   "version": "1.0.0",
-  "description": "Analyze terms and conditions with spaCy",
+  "description": "Analyze terms and conditions",
   "permissions": [
     "storage",
     "activeTab",
@@ -12,12 +12,12 @@
     "<all_urls>"
   ],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "src/core/background.js"
   },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["content.js"],
+      "js": ["src/content/content.js"],
       "css": ["styles/sidebar.css"],
       "run_at": "document_idle"
     }
@@ -31,13 +31,13 @@
     }
   ],
   "action": {
-    "default_popup": "popup.html",
+    "default_popup": "src/ui/popup.html",
     "default_icon": {
-      "128": "icons/icon128.png"
+      "128": "assets/icons/icon128.png"
     }
   },
   "icons": {
-    "128": "icons/icon128.png"
+    "128": "assets/icons/icon128.png"
   }
 }
 
