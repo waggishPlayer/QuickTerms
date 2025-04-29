@@ -245,20 +245,72 @@ if (!window.quickTermsInitialized) {
         }
 
         generateSummary(content) {
-            // Simple summary generation
+            // Keywords for important T&C sections
+            const importantKeywords = [
+                'privacy', 'data', 'personal information', 'collection', 'use', 'share',
+                'liability', 'responsibility', 'warranty', 'guarantee', 'damages',
+                'termination', 'cancel', 'suspend', 'account', 'access',
+                'intellectual property', 'copyright', 'trademark', 'license',
+                'governance', 'law', 'jurisdiction', 'dispute', 'arbitration',
+                'modification', 'change', 'update', 'notification',
+                'third party', 'partner', 'affiliate', 'service provider'
+            ];
+
+            // Split content into sentences
             const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 0);
-            const importantSentences = sentences
-                .filter(s => {
-                    const lower = s.toLowerCase();
-                    return lower.includes('must') || 
-                           lower.includes('shall') || 
-                           lower.includes('required') ||
-                           lower.includes('obligation') ||
-                           lower.includes('responsibility');
-                })
-                .slice(0, 5);
             
-            return importantSentences.join('. ') + '.';
+            // Find sentences containing important keywords
+            const importantSentences = sentences
+                .filter(sentence => {
+                    const lowerSentence = sentence.toLowerCase();
+                    return importantKeywords.some(keyword => lowerSentence.includes(keyword));
+                })
+                .map(sentence => {
+                    // Clean up the sentence
+                    let clean = sentence
+                        .replace(/^you\s+/i, '')
+                        .replace(/\s+by\s+using\s+this\s+service/i, '')
+                        .replace(/\s+when\s+you\s+use\s+this\s+service/i, '')
+                        .replace(/\s+in\s+connection\s+with\s+this\s+service/i, '')
+                        .trim();
+
+                    // Ensure proper capitalization
+                    clean = clean.charAt(0).toUpperCase() + clean.slice(1);
+
+                    // Ensure the sentence ends with a period
+                    if (!clean.endsWith('.')) {
+                        clean += '.';
+                    }
+
+                    return clean;
+                })
+                .slice(0, 5); // Get top 5 most important points
+
+            // If we don't have enough important sentences, add some general ones
+            if (importantSentences.length < 3) {
+                const generalSentences = sentences
+                    .filter(sentence => {
+                        const lowerSentence = sentence.toLowerCase();
+                        return lowerSentence.includes('must') || 
+                               lowerSentence.includes('shall') || 
+                               lowerSentence.includes('required') ||
+                               lowerSentence.includes('obligation') ||
+                               lowerSentence.includes('agree') ||
+                               lowerSentence.includes('accept');
+                    })
+                    .map(sentence => {
+                        let clean = sentence.trim();
+                        if (!clean.endsWith('.')) {
+                            clean += '.';
+                        }
+                        return clean;
+                    })
+                    .slice(0, 5 - importantSentences.length);
+
+                importantSentences.push(...generalSentences);
+            }
+
+            return importantSentences;
         }
 
         identifyRisks(content) {
@@ -282,18 +334,172 @@ if (!window.quickTermsInitialized) {
             if (!this.sidebar) return;
             
             const contentDiv = this.sidebar.querySelector('.quickterms-content');
+            if (!contentDiv) return;
+
             contentDiv.innerHTML = `
+                <style>
+                    .quickterms-sidebar {
+                        position: fixed;
+                        right: 0;
+                        top: 0;
+                        width: 350px; /* Reduced width */
+                        height: 100vh;
+                        background: #ffffff;
+                        box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+                        z-index: 9999;
+                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+                        overflow-y: auto;
+                        padding: 15px;
+                        color: #333333;
+                    }
+
+                    .quickterms-header {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        padding-bottom: 12px;
+                        border-bottom: 2px solid #1a73e8;
+                        margin-bottom: 20px;
+                        background: #1a73e8;
+                        padding: 15px;
+                        border-radius: 6px 6px 0 0;
+                    }
+
+                    .quickterms-header h2 {
+                        margin: 0;
+                        font-size: 24px;
+                        font-weight: 700;
+                        color: #ffffff;
+                    }
+
+                    .quickterms-close {
+                        background: none;
+                        border: none;
+                        font-size: 24px;
+                        cursor: pointer;
+                        color: #ffffff;
+                        padding: 5px;
+                        line-height: 1;
+                        transition: color 0.2s;
+                    }
+
+                    .quickterms-close:hover {
+                        color: #e0e0e0;
+                    }
+
+                    .quickterms-section {
+                        margin-bottom: 20px;
+                        background: #f8f9fa;
+                        padding: 15px;
+                        border-radius: 6px;
+                        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+                    }
+
+                    .quickterms-section h3 {
+                        font-size: 16px;
+                        font-weight: 600;
+                        color: #1a73e8;
+                        margin: 0 0 15px 0;
+                        padding-bottom: 8px;
+                        border-bottom: 1px solid #e0e0e0;
+                    }
+
+                    .quickterms-summary {
+                        font-size: 14px;
+                        line-height: 1.5;
+                        color: #2c3e50;
+                    }
+
+                    .quickterms-point {
+                        margin-bottom: 12px;
+                        padding-left: 25px;
+                        position: relative;
+                        color: #2c3e50;
+                    }
+
+                    .quickterms-point:before {
+                        content: "•";
+                        position: absolute;
+                        left: 0;
+                        font-size: 20px;
+                        color: #1a73e8;
+                        line-height: 1;
+                        font-weight: bold;
+                    }
+
+                    .quickterms-clauses {
+                        list-style: none;
+                        padding: 0;
+                        margin: 0;
+                    }
+
+                    .quickterms-clause {
+                        background: #ffffff;
+                        padding: 12px;
+                        margin-bottom: 10px;
+                        border-radius: 6px;
+                        font-size: 13px;
+                        color: #2c3e50;
+                        border-left: 3px solid #1a73e8;
+                        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+                        transition: transform 0.2s, box-shadow 0.2s;
+                    }
+
+                    .quickterms-clause:hover {
+                        transform: translateX(5px);
+                        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                    }
+
+                    .quickterms-loading {
+                        text-align: center;
+                        padding: 20px;
+                        color: #666;
+                        font-size: 14px;
+                        background: #f8f9fa;
+                        border-radius: 6px;
+                    }
+
+                    .quickterms-error {
+                        color: #d32f2f;
+                        background: #ffebee;
+                        padding: 15px;
+                        border-radius: 6px;
+                        margin: 10px 0;
+                        font-size: 13px;
+                        border-left: 3px solid #d32f2f;
+                    }
+
+                    /* Scrollbar styling */
+                    .quickterms-sidebar::-webkit-scrollbar {
+                        width: 6px;
+                    }
+
+                    .quickterms-sidebar::-webkit-scrollbar-track {
+                        background: #f1f1f1;
+                    }
+
+                    .quickterms-sidebar::-webkit-scrollbar-thumb {
+                        background: #1a73e8;
+                        border-radius: 3px;
+                    }
+
+                    .quickterms-sidebar::-webkit-scrollbar-thumb:hover {
+                        background: #1557b0;
+                    }
+                </style>
                 <div class="quickterms-section">
                     <h3>Summary</h3>
-                    <p>${summary}</p>
+                    <div class="quickterms-summary">
+                        ${summary.map(point => `<div class="quickterms-point">${point}</div>`).join('')}
+                    </div>
                 </div>
                 <div class="quickterms-section">
                     <h3>Key Risks</h3>
                     <ul class="quickterms-clauses">
                         ${risks.map(risk => `<li class="quickterms-clause">${risk}</li>`).join('')}
                     </ul>
-        </div>
-    `;
+                </div>
+            `;
         }
 
         updateSidebarError(errorMessage) {
