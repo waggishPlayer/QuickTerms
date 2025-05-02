@@ -6,7 +6,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             if (tabs[0]) {
                 chrome.scripting.executeScript({
                     target: { tabId: tabs[0].id },
-                    files: ['content.js']
+                    files: ['src/content/content.js']
                 }).catch(error => {
                     console.error('Error injecting content script:', error);
                 });
@@ -28,7 +28,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
                 // Inject content script
                 chrome.scripting.executeScript({
                     target: { tabId: tabId },
-                    files: ['content.js']
+                    files: ['src/content/content.js']
                 }).catch(error => {
                     console.error('Error injecting content script:', error);
                 });
